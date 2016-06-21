@@ -34,6 +34,9 @@ public class CodegenConstants {
     public static final String LOCAL_VARIABLE_PREFIX = "localVariablePrefix";
     public static final String LOCAL_VARIABLE_PREFIX_DESC = "prefix for generated code members and local variables";
 
+    public static final String DEPENDENCIES = "dependencies";
+    public static final String DEPENDENCIES_DESC = "declare a list of used dependencies";
+
     public static final String SERIALIZABLE_MODEL = "serializableModel";
     public static final String SERIALIZABLE_MODEL_DESC = "boolean - toggle \"implements Serializable\" for generated models";
 

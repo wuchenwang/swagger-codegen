@@ -1,5 +1,7 @@
 package io.swagger.codegen.config;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import io.swagger.codegen.ClientOptInput;
 import io.swagger.codegen.CodegenConfig;
 import io.swagger.codegen.CodegenConfigLoader;
@@ -249,44 +251,52 @@ public class CodegenConfiguratorTest {
 
     @Test
     public void testFromFile() throws Exception {
-        final CodegenConfigurator configurator = CodegenConfigurator.fromFile("src/test/resources/sampleConfig.json");
+        List<String> files = ImmutableList.of("src/test/resources/sampleConfig.json",
+                "src/test/resources/sampleConfig.yaml");
 
-        assertEquals(configurator.getLang(), "java");
-        assertEquals(configurator.getInputSpec(), "swagger.yaml");
-        assertEquals(configurator.getOutputDir(), toAbsolutePathDir("src/gen/java"));
-        assertEquals(configurator.isVerbose(), true);
-        assertEquals(configurator.isSkipOverwrite(), true);
-        assertEquals(configurator.getTemplateDir(), toAbsolutePathDir("src/main/resources"));
-        assertEquals(configurator.getAuth(), "hello:world");
-        assertEquals(configurator.getApiPackage(), "io.something.api");
-        assertEquals(configurator.getModelPackage(), "io.something.models");
-        assertEquals(configurator.getInvokerPackage(), "io.something.invoker");
-        assertEquals(configurator.getGroupId(), "io.something");
-        assertEquals(configurator.getArtifactId(), "awesome-api");
-        assertEquals(configurator.getArtifactVersion(), "1.2.3");
-        assertEquals(configurator.getLibrary(), "jersey2");
+        for (String file: files) {
+            final CodegenConfigurator configurator = CodegenConfigurator.fromFile(file);
 
-        assertEquals(configurator.getSystemProperties().size(), 1);
-        assertValueInMap(configurator.getSystemProperties(), "systemProp1", "value1");
+            assertEquals(configurator.getLang(), "java");
+            assertEquals(configurator.getInputSpec(), "swagger.yaml");
+            assertEquals(configurator.getOutputDir(), toAbsolutePathDir("src/gen/java"));
+            assertEquals(configurator.isVerbose(), true);
+            assertEquals(configurator.isSkipOverwrite(), true);
+            assertEquals(configurator.getTemplateDir(), toAbsolutePathDir("src/main/resources"));
+            assertEquals(configurator.getAuth(), "hello:world");
+            assertEquals(configurator.getApiPackage(), "io.something.api");
+            assertEquals(configurator.getModelPackage(), "io.something.models");
+            assertEquals(configurator.getInvokerPackage(), "io.something.invoker");
+            assertEquals(configurator.getGroupId(), "io.something");
+            assertEquals(configurator.getArtifactId(), "awesome-api");
+            assertEquals(configurator.getArtifactVersion(), "1.2.3");
+            assertEquals(configurator.getLibrary(), "jersey2");
+            assertEquals(configurator.getDependencies(), ImmutableList.of(ImmutableMap.of("property1", "A", "property2", "A1"),
+                    ImmutableMap.of("property1", "B", "property2", "B1")));
 
-        assertEquals(configurator.getInstantiationTypes().size(), 1);
-        assertValueInMap(configurator.getInstantiationTypes(), "hello", "world");
+            assertEquals(configurator.getSystemProperties().size(), 1);
+            assertValueInMap(configurator.getSystemProperties(), "systemProp1", "value1");
 
-        assertEquals(configurator.getTypeMappings().size(), 1);
-        assertValueInMap(configurator.getTypeMappings(), "foo", "bar");
+            assertEquals(configurator.getInstantiationTypes().size(), 1);
+            assertValueInMap(configurator.getInstantiationTypes(), "hello", "world");
 
-        assertEquals(configurator.getAdditionalProperties().size(), 1);
-        assertValueInMap(configurator.getAdditionalProperties(), "addtProp1", "value2");
+            assertEquals(configurator.getTypeMappings().size(), 1);
+            assertValueInMap(configurator.getTypeMappings(), "foo", "bar");
 
-        assertEquals(configurator.getImportMappings().size(), 1);
-        assertValueInMap(configurator.getImportMappings(), "type1", "import1");
+            assertEquals(configurator.getAdditionalProperties().size(), 1);
+            assertValueInMap(configurator.getAdditionalProperties(), "addtProp1", "value2");
+
+            assertEquals(configurator.getImportMappings().size(), 1);
+            assertValueInMap(configurator.getImportMappings(), "type1", "import1");
 
 
-        assertEquals(configurator.getLanguageSpecificPrimitives().size(), 1);
-        assertTrue(configurator.getLanguageSpecificPrimitives().contains("rolex"));
+            assertEquals(configurator.getLanguageSpecificPrimitives().size(), 1);
+            assertTrue(configurator.getLanguageSpecificPrimitives().contains("rolex"));
 
-        assertEquals(configurator.getDynamicProperties().size(), 1);
-        assertValueInMap(configurator.getDynamicProperties(), CodegenConstants.LOCAL_VARIABLE_PREFIX, "_");
+            assertEquals(configurator.getDynamicProperties().size(), 1);
+            assertValueInMap(configurator.getDynamicProperties(), CodegenConstants.LOCAL_VARIABLE_PREFIX, "_");
+        }
+
     }
 
     @SuppressWarnings("unused")

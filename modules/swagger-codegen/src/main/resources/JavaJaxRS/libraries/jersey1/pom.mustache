@@ -84,6 +84,14 @@
     </plugins>
   </build>
   <dependencies>
+    {{#dependencies}}
+    <dependency>
+      <groupId>{{groupId}}</groupId>
+      <artifactId>{{artifactId}}</artifactId>
+      <scope>{{scope}}</scope>
+      <version>{{version}}</version>
+    </dependency>
+    {{/dependencies}}
     <dependency>
       <groupId>io.swagger</groupId>
       <artifactId>swagger-jersey-jaxrs</artifactId>

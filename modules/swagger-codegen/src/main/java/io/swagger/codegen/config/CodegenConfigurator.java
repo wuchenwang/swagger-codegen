@@ -13,6 +13,7 @@ import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
+import io.swagger.util.Yaml;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,7 @@ public class CodegenConfigurator {
     private String apiPackage;
     private String modelPackage;
     private String invokerPackage;
+    private List<Map> dependencies;
     private String modelNamePrefix;
     private String modelNameSuffix;
     private String groupId;
@@ -57,7 +59,7 @@ public class CodegenConfigurator {
     private Map<String, String> systemProperties = new HashMap<String, String>();
     private Map<String, String> instantiationTypes = new HashMap<String, String>();
     private Map<String, String> typeMappings = new HashMap<String, String>();
-    private Map<String, String> additionalProperties = new HashMap<String, String>();
+    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
     private Map<String, String> importMappings = new HashMap<String, String>();
     private Set<String> languageSpecificPrimitives = new HashSet<String>();
     private String gitUserId="GIT_USER_ID";
@@ -204,6 +206,15 @@ public class CodegenConfigurator {
         return this;
     }
 
+    public List<Map> getDependencies() {
+        return dependencies;
+    }
+
+    public CodegenConfigurator setDependencies(List<Map> dependencies) {
+        this.dependencies = dependencies;
+        return this;
+    }
+
     public String getArtifactVersion() {
         return artifactVersion;
     }
@@ -255,11 +266,11 @@ public class CodegenConfigurator {
         return this;
     }
 
-    public Map<String, String> getAdditionalProperties() {
+    public Map<String, Object> getAdditionalProperties() {
         return additionalProperties;
     }
 
-    public CodegenConfigurator setAdditionalProperties(Map<String, String> additionalProperties) {
+    public CodegenConfigurator setAdditionalProperties(Map<String, Object> additionalProperties) {
         this.additionalProperties = additionalProperties;
         return this;
     }
@@ -366,6 +377,7 @@ public class CodegenConfigurator {
         checkAndSetAdditionalProperty(groupId, CodegenConstants.GROUP_ID);
         checkAndSetAdditionalProperty(artifactId, CodegenConstants.ARTIFACT_ID);
         checkAndSetAdditionalProperty(artifactVersion, CodegenConstants.ARTIFACT_VERSION);
+        checkAndSetAdditionalProperty(dependencies, CodegenConstants.DEPENDENCIES);
         checkAndSetAdditionalProperty(templateDir, toAbsolutePathStr(templateDir), CodegenConstants.TEMPLATE_DIR);
         checkAndSetAdditionalProperty(modelNamePrefix, CodegenConstants.MODEL_NAME_PREFIX);
         checkAndSetAdditionalProperty(modelNameSuffix, CodegenConstants.MODEL_NAME_SUFFIX);
@@ -449,13 +461,19 @@ public class CodegenConfigurator {
 
     }
 
-    private void checkAndSetAdditionalProperty(String property, String propertyKey) {
+    private void checkAndSetAdditionalProperty(Object property, String propertyKey) {
         checkAndSetAdditionalProperty(property, property, propertyKey);
     }
 
-    private void checkAndSetAdditionalProperty(String property, String valueToSet, String propertyKey) {
-        if (isNotEmpty(property)) {
-            additionalProperties.put(propertyKey, valueToSet);
+    private void checkAndSetAdditionalProperty(Object property, Object valueToSet, String propertyKey) {
+        if (property instanceof String) {
+            if (isNotEmpty((String) property)) {
+                additionalProperties.put(propertyKey, valueToSet);
+            }
+        } else if (property instanceof List) {
+            if (null != property) {
+                additionalProperties.put(propertyKey, valueToSet);
+            }
         }
     }
 
@@ -463,7 +481,11 @@ public class CodegenConfigurator {
 
         if (isNotEmpty(configFile)) {
             try {
-                return Json.mapper().readValue(new File(configFile), CodegenConfigurator.class);
+                if (configFile.endsWith(".json")) {
+                    return Json.mapper().readValue(new File(configFile), CodegenConfigurator.class);
+                } else if (configFile.endsWith(".yaml")) {
+                    return Yaml.mapper().readValue(new File(configFile), CodegenConfigurator.class);
+                }
             } catch (IOException e) {
                 LOGGER.error("Unable to deserialize config file: " + configFile, e);
             }
