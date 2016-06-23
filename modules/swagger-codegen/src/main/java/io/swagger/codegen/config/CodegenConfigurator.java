@@ -2,6 +2,7 @@ package io.swagger.codegen.config;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.codegen.CliOption;
 import io.swagger.codegen.ClientOptInput;
 import io.swagger.codegen.ClientOpts;
@@ -466,12 +467,16 @@ public class CodegenConfigurator {
     }
 
     private void checkAndSetAdditionalProperty(Object property, Object valueToSet, String propertyKey) {
+        Validate.notNull(property);
+
         if (property instanceof String) {
             if (isNotEmpty((String) property)) {
                 additionalProperties.put(propertyKey, valueToSet);
             }
         } else if (property instanceof List) {
-            if (null != property) {
+            List list = (List) property;
+
+            if (!list.isEmpty()) {
                 additionalProperties.put(propertyKey, valueToSet);
             }
         }
@@ -481,11 +486,14 @@ public class CodegenConfigurator {
 
         if (isNotEmpty(configFile)) {
             try {
+                ObjectMapper mapper = new ObjectMapper();
                 if (configFile.endsWith(".json")) {
-                    return Json.mapper().readValue(new File(configFile), CodegenConfigurator.class);
+                    mapper = Json.mapper();
                 } else if (configFile.endsWith(".yaml")) {
-                    return Yaml.mapper().readValue(new File(configFile), CodegenConfigurator.class);
+                    mapper = Yaml.mapper();
                 }
+
+                return mapper.readValue(new File(configFile), CodegenConfigurator.class);
             } catch (IOException e) {
                 LOGGER.error("Unable to deserialize config file: " + configFile, e);
             }
