@@ -467,8 +467,6 @@ public class CodegenConfigurator {
     }
 
     private void checkAndSetAdditionalProperty(Object property, Object valueToSet, String propertyKey) {
-        Validate.notNull(property);
-
         if (property instanceof String) {
             if (isNotEmpty((String) property)) {
                 additionalProperties.put(propertyKey, valueToSet);
